@@ -4,6 +4,13 @@
 contracts/trellis_core/.env
 *.log
 
+# IDE settings — user-specific, should not be tracked
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
 # Frontend build output — never commit generated artifacts.
 frontend/dist/
 

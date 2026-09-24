@@ -80,6 +80,8 @@ typecheck-frontend:
 
 # ── Deploy ─────────────────────────────────────────────────────────────────
 
+DEPLOYER_IDENTITY ?= trellis-deployer
+
 deploy:
 	@echo "=== Deploying Trellis to Stellar Testnet ==="
 	@echo "Ensure you have:"
@@ -89,7 +91,7 @@ deploy:
 	@echo "Running: stellar contract deploy ..."
 	stellar contract deploy \
 		--wasm target/wasm32-unknown-unknown/release/trellis_core.wasm \
-		--source trellis-deployer \
+		--source $(DEPLOYER_IDENTITY) \
 		--network testnet
 
 # ── Clean ──────────────────────────────────────────────────────────────────
