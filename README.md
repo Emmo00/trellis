@@ -651,7 +651,7 @@ Supported shells: `bash`, `zsh`, `fish`, `elvish`, `powershell`.
 
 - Core Soroban escrow contract — all 10 entrypoints implemented and tested
 - Full state machine — happy path, dispute resolution, and cancellation paths
-- Integration test suite — 9/9 passing in the Soroban sandbox
+- Integration test suite — 41/41 passing in the Soroban sandbox
 - Full CLI — all 8 commands wired end-to-end with JSON, dry-run, and human-readable output modes
 - Deployed live on Stellar testnet — `init` and `status` verified against the live contract
 - Frontend dashboard — 5 pages, 28 components, 12 custom hooks, animated particle network background

@@ -176,17 +176,20 @@ cd contracts/trellis_core
 cargo test
 ```
 
-Exactly 9 tests should pass:
+The suite currently runs **41 tests**, split across three modules:
 
-1. `test_happy_path` — covers `init -> lock_funds -> submit_work -> approve_and_release`, including payer/payee/contract balances.
-2. `test_double_init_fails` — verifies the double-init guard returns `TrellisError::AlreadyInitialized` for an existing agreement ID.
-3. `test_dispute_and_refund_to_payer` — covers a payee-raised dispute where the resolver refunds the payer.
-4. `test_cancel_unfunded_milestone` — verifies an unfunded milestone can be cancelled once and cannot be cancelled a second time.
-5. `test_get_agreement` — verifies `get_agreement` returns the stored agreement and rejects an unknown agreement ID.
-6. `test_init_empty_milestones_fails` — verifies `init` rejects an empty `milestones` vector with `TrellisError::EmptyMilestoneSet` and leaves no storage entry behind.
-7. `test_payer_as_resolver_rejected` — verifies `init` rejects `dispute_resolver == payer` with `TrellisError::ResolverCannotBeParty`.
-8. `test_payee_as_resolver_rejected` — verifies `init` rejects `dispute_resolver == payee` with `TrellisError::ResolverCannotBeParty`.
-9. `test_dispute_raised_event_includes_caller` — verifies the `dispute_raised` event data carries `caller` for both the payer-raised and payee-raised paths.
+| Module | Tests | Coverage |
+| --- | --- | --- |
+| `src/test.rs` | 21 | Example-based lifecycle, error paths, role checks, and TTL extension |
+| `src/test_properties.rs` | 11 | `proptest` invariants — balance conservation, invalid amounts, and milestone isolation |
+| `src/test_panic_boundaries.rs` | 9 | Panic-boundary and fuzz coverage for every entrypoint |
+| **Total** | **41** | |
+
+Representative example-based tests in `src/test.rs` include `test_happy_path`, `test_double_init_fails`, `test_dispute_and_refund_to_payer`, `test_cancel_unfunded_milestone`, `test_cancel_funded_milestone_fails_with_invalid_state_transition`, `test_get_agreement`, `test_batch_lock_funds_partial_failure`, and the six `*_wrong_role_fails` authorization tests.
+
+![Contract tests](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Trellis-Ecosystem/trellis/master/.github/badges/contract-tests.json)
+
+The badge and the counts above are refreshed by the [`test-count-badge`](.github/workflows/test-count-badge.yml) workflow on every push to `master`, so the documented total always tracks `cargo test`.
 
 If any baseline test fails, open an issue before continuing. Do not start feature, bug-fix, or documentation work on a broken baseline unless your assigned issue is specifically about that failure.
 
@@ -287,7 +290,7 @@ git checkout -b test/live-status-command
 
 All of the following must be true before requesting review:
 
-- `cargo test` passes 5/5 in `contracts/trellis_core`.
+- `cargo test` passes 41/41 in `contracts/trellis_core`.
 - `cargo build` passes with zero warnings in both Rust crates you touched.
 - The PR description explains what changed and why.
 - The PR references the issue number using `Closes #X`.
