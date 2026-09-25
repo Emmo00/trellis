@@ -8,6 +8,22 @@ on:
   schedule:
     # Run mutation tests weekly on Sundays at 00:00 UTC
     - cron: '0 0 * * 0'
+  # Manual runs let maintainers exercise the heavy suites (property tests, gas
+  # benchmarks, mutation tests, CLI matrix, coverage) on demand — for example
+  # before a release freeze or when chasing a flaky test — without pushing a
+  # throwaway commit.
+  workflow_dispatch:
+    inputs:
+      proptest_cases:
+        description: 'Number of property-test cases per property.'
+        required: false
+        default: '8192'
+        type: string
+      run_mutation_tests:
+        description: 'Also run the slower mutation-testing suite.'
+        required: false
+        default: false
+        type: boolean
 
 env:
   RUST_BACKTRACE: 1
@@ -25,9 +41,9 @@ jobs:
         with:
           toolchain: stable
       
-      - name: Run property tests (8192 cases)
+      - name: Run property tests (${{ inputs.proptest_cases || 8192 }} cases)
         working-directory: contracts/trellis_core
-        run: PROPTEST_CASES=8192 cargo test test_properties
+        run: PROPTEST_CASES=${{ inputs.proptest_cases || 8192 }} cargo test test_properties
         env:
           RUST_LOG: debug
 
@@ -68,8 +84,9 @@ jobs:
   mutation-tests:
     name: Mutation Testing
     runs-on: ubuntu-latest
-    # Only run on schedule (weekly) or manual trigger
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    # Always run on the weekly schedule; on manual runs only when explicitly
+    # requested via the `run_mutation_tests` input (the suite is slow).
+    if: github.event_name == 'schedule' || inputs.run_mutation_tests
     steps:
       - uses: actions/checkout@v4
       
