@@ -25,6 +25,8 @@ on:
     # Weekly supply-chain scan — every Monday at 06:00 UTC.
     # Runs even when no code changes to catch newly published advisories.
     - cron: '0 6 * * 1'
+  # Manual runs let maintainers re-validate the contract/CLI toolchain on
+  # demand — e.g. after a Rust or tool version bump — without a dummy commit.
   workflow_dispatch:
 
 concurrency:
