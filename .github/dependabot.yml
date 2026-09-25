@@ -14,6 +14,11 @@ updates:
         update-types:
           - "minor"
           - "patch"
+      npm-security-updates:
+        dependency-type: "production"
+        update-types:
+          - "patch"
+        applies-to: "security-updates"
 
   # Covers Cargo.toml dependencies and the `channel` pin in
   # rust-toolchain.toml — Dependabot bumps both automatically.
@@ -30,6 +35,11 @@ updates:
         update-types:
           - "minor"
           - "patch"
+      cargo-security-updates:
+        dependency-type: "production"
+        update-types:
+          - "patch"
+        applies-to: "security-updates"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -39,3 +49,6 @@ updates:
     labels:
       - "dependencies"
       - "ci"
+    groups:
+      actions-security-updates:
+        applies-to: "security-updates"
