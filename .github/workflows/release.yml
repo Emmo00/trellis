@@ -2,8 +2,10 @@ name: Release
 
 # Pushing a `v*` tag (e.g. `v0.2.0`, `v0.2.0-test`) cuts a draft GitHub Release:
 # changelog from conventional commits, plus the compiled contract WASM and CLI
-# binaries attached as artifacts. Version bumps to Cargo.toml happen before the
-# tag is pushed (that's what's being released), not inside this workflow.
+# binaries attached as artifacts. The committed CHANGELOG.md is regenerated and
+# pushed back to the default branch so release history stays browsable without
+# cutting a release. Version bumps to Cargo.toml happen before the tag is
+# pushed (that's what's being released), not inside this workflow.
 on:
   push:
     tags:
@@ -28,6 +30,7 @@ jobs:
         id: version
         run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
+      # Release notes for this specific tag — attached to the GitHub Release.
       - name: Generate changelog with git-cliff
         uses: orhun/git-cliff-action@v4
         id: git-cliff
@@ -42,6 +45,33 @@ jobs:
         with:
           name: changelog
           path: CHANGELOG.md
+
+      # Committed changelog — full release history, kept in the repository so
+      # it can be read without cutting a release or browsing tags.
+      - name: Regenerate committed CHANGELOG.md
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --output CHANGELOG.md
+        env:
+          OUTPUT: CHANGELOG.md
+
+      - name: Commit updated CHANGELOG.md
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
+          if git diff --quiet -- CHANGELOG.md; then
+            echo "CHANGELOG.md is already up to date."
+            exit 0
+          fi
+          git add CHANGELOG.md
+          git commit -m "chore(release): update CHANGELOG.md for ${GITHUB_REF_NAME}"
+          # Replay the changelog commit on top of the latest default branch so
+          # the push stays a fast-forward if the branch moved while we ran.
+          git pull --rebase origin "$DEFAULT_BRANCH"
+          git push origin "HEAD:$DEFAULT_BRANCH"
 
   verify-version:
     name: Verify tag matches Cargo.toml/package.json versions
