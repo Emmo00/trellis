@@ -18,11 +18,13 @@
 #   make test-frontend — run only frontend tests
 #   make lint-contract — run only clippy on contract and CLI
 #   make lint-frontend — run only oxlint on frontend
+#   make changelog     — regenerate CHANGELOG.md from git history (git-cliff)
 
 .PHONY: help build test lint fmt deploy clean setup
 .PHONY: build-contract build-cli build-frontend
 .PHONY: test-contract test-snapshots-update test-frontend
 .PHONY: lint-contract lint-frontend typecheck-frontend
+.PHONY: changelog
 
 help:
 	@echo "Trellis Protocol — Build Targets"
@@ -77,6 +79,18 @@ fmt:
 
 typecheck-frontend:
 	cd frontend && npm run typecheck
+
+# ── Changelog ──────────────────────────────────────────────────────────────
+
+# Requires git-cliff: https://github.com/orhun/git-cliff
+changelog:
+	# Regenerate the committed CHANGELOG.md from conventional commits.
+	@command -v git-cliff >/dev/null 2>&1 || { \
+		echo "git-cliff not found. Install it with: cargo install git-cliff"; \
+		exit 1; \
+	}
+	git-cliff --config cliff.toml --output CHANGELOG.md
+	@echo "CHANGELOG.md regenerated from git history."
 
 # ── Deploy ─────────────────────────────────────────────────────────────────
 
