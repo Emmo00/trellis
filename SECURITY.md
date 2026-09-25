@@ -26,10 +26,9 @@ Instead, report it privately using one of these channels:
 1. **Preferred:** Use GitHub's private vulnerability reporting for this
    repository — go to the **Security** tab → **Report a vulnerability**.
    This opens a private advisory visible only to maintainers.
-2. **Email:** if you cannot use GitHub's reporting tool, email
-   **talk2izeek@gmail.com** with a description of the issue, steps to
-   reproduce, and its potential impact. Encrypt sensitive details if
-   possible.
+2. **Email:** if you cannot use GitHub's reporting tool, send an encrypted
+   email to the security team. PGP key fingerprint available at
+   https://github.com/trellisorg/trellis/security
 
 Please include as much of the following as you can:
 
