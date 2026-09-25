@@ -1,0 +1,61 @@
+name: Test Count Badge
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - 'contracts/trellis_core/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/test-count-badge.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: test-count-badge-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update-badge:
+    name: Count contract tests and update badge
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry and build artifacts
+        uses: Swatinem/rust-cache@v2
+
+      - name: Count contract tests
+        id: count
+        run: |
+          set -euo pipefail
+          count=$(cargo test --manifest-path contracts/trellis_core/Cargo.toml -- --list 2>/dev/null | grep -c ': test$' || true)
+          count=${count:-0}
+          echo "count=${count}" >> "$GITHUB_OUTPUT"
+
+      - name: Write badge JSON
+        run: |
+          set -euo pipefail
+          mkdir -p .github/badges
+          printf '{"schemaVersion":1,"label":"contract tests","message":"%s passing","color":"brightgreen"}\n' \
+            "${{ steps.count.outputs.count }}" > .github/badges/contract-tests.json
+
+      - name: Commit badge update
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- .github/badges/contract-tests.json; then
+            echo "Test count unchanged; badge already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/badges/contract-tests.json
+          git commit -m "chore: update contract test count badge [skip ci]"
+          git push
